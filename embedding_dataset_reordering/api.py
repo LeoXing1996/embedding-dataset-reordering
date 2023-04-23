@@ -21,6 +21,7 @@ def get_shard(file_path):
 
 def reorder_shard(
     embedding_file,
+    embedding_prefix,
     metadata_file,
     output_folder,
     index_width,
@@ -40,6 +41,8 @@ def reorder_shard(
     with tempfile.TemporaryDirectory() as tmpdir:
         for i in range(max_tries):
             try:
+                # import ipdb
+                # ipdb.set_trace()
                 # Load the parquet into pandas
                 with fsspec.open(metadata_file, "rb") as f:
                     metadata_df = pd.read_parquet(f)
@@ -74,7 +77,7 @@ def reorder_shard(
                     if current_shard is None or current_shard != img_shard:
                         if current_shard is not None:
                             np.save(
-                                os.path.join(tmpdir, f"img_emb_{str(current_shard).zfill(output_shard_width)}.npy"),
+                                os.path.join(tmpdir, f"{embedding_prefix}_emb_{str(current_shard).zfill(output_shard_width)}.npy"),
                                 shard_embeddings,
                             )
                             log(f"Saved shard {current_shard}")
@@ -91,7 +94,7 @@ def reorder_shard(
                     shard_embeddings.append(embedding)
                     last_index = img_index
                 np.save(
-                    os.path.join(tmpdir, f"img_emb_{str(current_shard).zfill(output_shard_width)}.npy"),
+                    os.path.join(tmpdir, f"{embedding_prefix}_emb_{str(current_shard).zfill(output_shard_width)}.npy"),
                     shard_embeddings,
                 )
 
@@ -118,6 +121,7 @@ def reorder_shard(
 def reorder_embeddings(
     output_folder,
     embeddings_folder,
+    embedding_prefix,
     metadata_folder,
     index_width,
     output_shard_width,
@@ -158,7 +162,7 @@ def reorder_embeddings(
     if run_concurrent == 1:
         count = 0
         for embedding_path, metadata_path in tqdm(zip(embedding_paths, metadata_paths), total=len(embedding_paths)):
-            reorder_shard(embedding_path, metadata_path, output_folder, 4, 6, verbose)
+            reorder_shard(embedding_path, embedding_prefix, metadata_path, output_folder, 4, 6, verbose)
             count += 1
             if limit is not None and count >= limit:
                 break

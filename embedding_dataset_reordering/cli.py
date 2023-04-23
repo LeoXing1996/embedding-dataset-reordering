@@ -16,6 +16,7 @@ def cli():
 @click.option(
     "--embeddings-folder", required=True, help="The folder containing the embeddings to reorder", type=click.STRING
 )
+@click.option("--embedding-prefix", default='img', help="The prefix for embedding file", type=click.STRING)
 @click.option(
     "--metadata-folder", required=True, help="The folder containing the metadata to reorder", type=click.STRING
 )
@@ -34,6 +35,7 @@ def cli():
 def reorder(
     output_folder,
     embeddings_folder,
+    embedding_prefix,
     metadata_folder,
     index_width,
     output_shard_width,
@@ -51,6 +53,7 @@ def reorder(
     reorder_embeddings(
         output_folder,
         embeddings_folder,
+        embedding_prefix,
         metadata_folder,
         index_width,
         output_shard_width,
